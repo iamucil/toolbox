@@ -1,17 +1,21 @@
 PHP_MIGRATOR_IMAGE ?= larevel-migration 
 NODE_IMAGE ?= node:16-alpine
+COMPOSER_IMAGE ?= composer:latest
 
-.PHONY: migrate deps-install
+.PHONY: init run deps-install
 
-migrate: 
-	@echo "running migrate"
-	@docker build -t $(PHP_MIGRATOR_IMAGE) -f $(CURDIR)/php/Dockerfile . > /dev/null
-	@echo "running laravel migrations"
-	@docker run --rm -i \
-		-v $(CURDIR)/app/web:/app \
+init:
+	@echo "initializing laravel-app"
+	@docker run --rm -i -t \
+		-v $(CURDIR)/app:/app \
 		--workdir=/app \
-		$(PHP_MIGRATOR_IMAGE) /bin/sh -c "php artisan migrate"
+		$(COMPOSER_IMAGE) /bin/sh -c "composer create-project laravel/laravel web" 
+	@mkdir -p $(CURDIR)/var/mariadb/data
 
+run:
+	@echo "running all services..."
+	@docker-compose up --build --abort-on-container-exit --remove-orphans
+	
 deps-install:
 	@echo "running npm install"
 	@docker run --rm -i -t \
