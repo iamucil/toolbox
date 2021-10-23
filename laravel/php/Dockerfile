@@ -6,4 +6,7 @@ RUN apk add --update --no-cache \
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
+# Get latest Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 WORKDIR /usr/share/nginx/html
