@@ -1,0 +1,40 @@
+version: '3'
+services:
+  db:
+    image: mariadb
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=zx6PDeOtvapS7rv7
+      - MYSQL_DATABASE=web
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=vFAZ6xEU4NHMXHcj
+    volumes:
+      - "./var/mariadb/data:/var/lib/mysql"
+  
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "38080:8080"
+  
+  php-fpm:
+    build:
+      context: .
+      dockerfile: ./php/Dockerfile
+    volumes:
+      - ./app/web:/usr/share/nginx/html
+  
+  app:
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - cms-db
+      - php-fpm
+    volumes:
+      - "./app/web:/usr/share/nginx/html"
+      # read sites cofiguration for nginx
+      - "./nginx/sites-available:/etc/nginx/sites-enabled"
